@@ -86,7 +86,7 @@ const EMBEDDED = [["2010-03-31",0.1,0.1,156606.0,3345.6,3109.11],["2010-04-01",0
 let DATA = EMBEDDED.slice();
 let RANGE = 'all', IDX = 'sh';
 
-const fmtY = v => (v/10000).toFixed(2) + '万亿';
+const fmtY = v => (v==null?'—':(v/10000).toFixed(2) + '万亿');
 function zoneOf(yi) {
   if (yi < 25000) return ['正常区','z-ok','杠杆常规水平，按既定策略执行'];
   if (yi < 28000) return ['谨慎区 · 2.5万亿线','z-caution','上穿后60日胜率仅23%：降仓位、收紧标准'];
@@ -94,12 +94,13 @@ function zoneOf(yi) {
   return ['极限区 · 禁止买入','z-extreme','超过3万亿硬顶红线'];
 }
 function lastRow(){ return DATA[DATA.length-1]; }
+function lastMarginRow(){ for (let i=DATA.length-1;i>=0;i--) if (DATA[i][1]!==null) return DATA[i]; return lastRow(); }
+function lastIndexRow(){ for (let i=DATA.length-1;i>=0;i--) { const v = IDX==='sh'?DATA[i][5]:DATA[i][4]; if (v) return v; } return null; }
 function renderStatus() {
-  const r = lastRow();
+  const r = lastMarginRow();
   document.getElementById('mval').textContent = fmtY(r[1]);
   document.getElementById('idate').textContent = r[0].slice(5);
-  const iv = IDX==='sh' ? r[5] : r[4];
-  document.getElementById('ival').textContent = iv || '—';
+  document.getElementById('ival').textContent = lastIndexRow() || '—';
   document.getElementById('iname').textContent = IDX==='sh' ? '上证指数' : '沪深300';
   const [zn, cls, desc] = zoneOf(r[1]);
   const z = document.getElementById('zone');
